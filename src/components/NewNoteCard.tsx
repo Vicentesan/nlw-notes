@@ -4,7 +4,11 @@ import { ChangeEvent, FormEvent, useState } from 'react'
 import { X } from 'lucide-react'
 import { toast } from 'sonner'
 
-export function NewNoteCard() {
+interface NewNoteCardProps {
+  onNoteCreated: (content: string) => void
+}
+
+export function NewNoteCard({ onNoteCreated }: NewNoteCardProps) {
   const [shouldShowOnBoarding, setShouldShowOnBoarding] =
     useState<boolean>(true)
   const [content, setContent] = useState<string>('')
@@ -22,6 +26,17 @@ export function NewNoteCard() {
   function handleSaveNote(event: FormEvent) {
     event.preventDefault()
 
+    if (
+      content.length <= 0 ||
+      content ===
+        'Start by recording an audio note or, if you prefer, just use text.'
+    )
+      return toast.error('Please, add a content to your note!')
+
+    onNoteCreated(content)
+    setContent('')
+    setShouldShowOnBoarding(true)
+
     toast.success('Note successfuly saved!')
   }
 
@@ -30,7 +45,7 @@ export function NewNoteCard() {
       <Dialog.DialogTrigger className="rounded-md flex flex-col gap-3 text-left bg-slate-700 p-5 hover:ring-2 hover:ring-slate-600 focus-visible:ring-2 focus-visible:ring-lime-400 outline-none">
         <span className="text-sm font-medium text-slate-200">Add note</span>
         <p className="text-sm leading-6 text-slate-400">
-          Start by recording an audio note or, if you prefer, just use text .
+          Start by recording an audio note or, if you prefer, just use text.
         </p>
       </Dialog.DialogTrigger>
 
@@ -41,10 +56,7 @@ export function NewNoteCard() {
               <X className="size-5" />
             </Dialog.DialogClose>
 
-            <form
-              onSubmit={(event) => handleSaveNote(event)}
-              className="flex-1 flex flex-col"
-            >
+            <form onSubmit={handleSaveNote} className="flex-1 flex flex-col">
               <div className="flex flex-1 flex-col gap-3 p-5">
                 <span className="text-sm font-medium text-slate-300">
                   Add note
@@ -69,7 +81,8 @@ export function NewNoteCard() {
                   <textarea
                     autoFocus
                     className="text-sm leading-6 text-slate-400 bg-transparent resize-none flex-1 outline-none"
-                    onChange={(event) => handleContentChanged(event)}
+                    onChange={handleContentChanged}
+                    value={content}
                   />
                 )}
               </div>
